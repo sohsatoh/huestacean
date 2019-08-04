@@ -67,9 +67,9 @@ void MyTcpServer::onConnect()
         "Content-Type: text/html; charset=UTF-8\r\n"
         "\r\n"
         "<html><head><title>XPG Server</title></head>"
-        "<body><p>Hello, World! Text is da bomb.</p></body>"
+        "<body><p>Start sync...</p></body>"
         "</html>"
-        ;
+    ;
 
     qDebug() << socket->write(response);
 
@@ -78,13 +78,20 @@ void MyTcpServer::onConnect()
     socket->close();
     delete socket;
 
-    // qmlObject->setProperty("text", "after");
+    QString buttonTitle = qmlObject->property("text").toString();
 
-    QEvent evtPress(QEvent::MouseButtonPress);
-    QEvent evtRelease(QEvent::MouseButtonRelease);
+    if ( buttonTitle.contains("Start", Qt::CaseInsensitive) != 0 ) {
+        QEvent evtPress(QEvent::MouseButtonPress);
+        QEvent evtRelease(QEvent::MouseButtonRelease);
 
-    qmlObject->event(&evtPress);
-    qmlObject->event(&evtRelease);
+        qmlObject->event(&evtPress);
+        qmlObject->event(&evtRelease);
+
+        qDebug() << "Start Sync";
+    }
+    else {
+        qDebug() << "Skipped";
+    }
 }
 
 
@@ -123,9 +130,6 @@ int main(int argc, char *argv[])
 
         QObject *rootObject = theEngine.rootObjects().first();
         qmlObject = rootObject->findChild<QObject*>("syncButton");
-
-        // qmlObject->setProperty("text", "before");
-
 
         MyTcpServer server;
 
