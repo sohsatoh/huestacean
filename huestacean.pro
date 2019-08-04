@@ -64,7 +64,7 @@ DISTFILES += \
 INCLUDEPATH += include
 
 #mbedtls
-INCLUDEPATH += C:/hueproj/huestacean/mbedtls/include
+INCLUDEPATH += /Users/soh/Downloads/huestacean-2.6/mbedtls/include
 
 equals(ANDROID_TARGET_ARCH, armeabi-v7a) {
     CONFIG(debug, debug|release) {

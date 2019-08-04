@@ -1,3 +1,0 @@
-# qmldir
-singleton Frontend frontend.qml
-singleton Common common.qml

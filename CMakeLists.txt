@@ -1,146 +1,55 @@
-cmake_minimum_required(VERSION 3.10)
-project(Huestacean)
+cmake_minimum_required(VERSION 3.9)
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
 endif()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments")
-endif()
-
-if (WIN32)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DNOMINMAX")
-endif()
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTORCC ON)
 
-find_program(CCACHE_FOUND ccache)
-if(CCACHE_FOUND)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
-endif(CCACHE_FOUND)
+project(Huestacean)
 
-find_package(Qt5Core REQUIRED) 
+find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Quick REQUIRED)
-find_package(Qt5RemoteObjects REQUIRED)
-
-set(MAIN_SOURCE 
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
-)
-
-SET(THIRD_PARTY_SOURCE
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/hsluv-c/src/hsluv.c
-)
-
-SET(THIRD_PARTY_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/hsluv-c/src/hsluv.h
-
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ChromaSDK/inc/RzChromaLinkAPI.h
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ChromaSDK/inc/RzChromaSDK.h
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ChromaSDK/inc/RzChromaSDKDefines.h
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ChromaSDK/inc/RzChromaSDKTypes.h
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ChromaSDK/inc/RzErrors.h
-)
+find_package(Qt5HttpServer REQUIRED)
 
 set(SOURCES
    ${SOURCES}
-   ${THIRD_PARTY_SOURCE}
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/backend/backend.cpp
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/common/math.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/common/scene.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/common/device.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/common/effect.cpp
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/effects/effects.cpp
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/hue/hue.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/hue/bridge.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/hue/bridgediscovery.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/hue/streamer.cpp
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/razer/chroma.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/razer/razer.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/razer/razerdevices.cpp
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/frontend/gui/gui.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/frontend/frontend.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/src/frontend/frontendtypes.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/bridgediscovery.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/entertainment.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/huebridge.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/huestacean.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/objectmodel.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
 )
 set(HEADERS
    ${HEADERS}
-   ${THIRD_PARTY_HEADERS}
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/common/device.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/common/effect.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/common/lightupdate.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/common/providertype.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/common/scene.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/common/math.h
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/effects/effects.h
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/hue/hue.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/hue/bridge.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/hue/bridgediscovery.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/hue/streamer.h
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/razer/chroma.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/razer/razer.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/razer/razerdevices.h
-
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/gui/gui.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/rep_frontend.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/frontend.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/frontendtypes.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/bridgediscovery.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/entertainment.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/huebridge.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/huestacean.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/objectmodel.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/utility.h
 )
 
-#headers with Qt-relevant types (for moc)
-set(QT_HEADERS
-	${CMAKE_CURRENT_SOURCE_DIR}/include/hue/bridgediscovery.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/hue/bridge.h
+QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 
-	${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/gui/gui.h
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/include ${CMAKE_CURRENT_SOURCE_DIR})
 
-	${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/frontendtypes.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/frontend.h
-	${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/rep_frontend.h
-)
-
-#QT5_WRAP_CPP(HEADERS_MOC ${QT_HEADERS})
-set(CMAKE_AUTOMOC ON)
-
-set(INCLUDE_PATHS
-	${INCLUDE_PATHS}
-
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${CMAKE_CURRENT_SOURCE_DIR}/include
-	${CMAKE_CURRENT_SOURCE_DIR}/resources
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/mbedtls/include
-	${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ChromaSDK/inc
-)
-
-include_directories(${INCLUDE_PATHS})
-
-add_subdirectory(thirdparty/screen_capture_lite EXCLUDE_FROM_ALL)
-add_subdirectory(thirdparty/mbedtls EXCLUDE_FROM_ALL)
+add_subdirectory(screen_capture_lite)
+add_subdirectory(mbedtls)
 
 set(LIBRARIES
    ${LIBRARIES}
    Qt5::Core
    Qt5::Network
-   Qt5::Quick 
-   Qt5::RemoteObjects
+   Qt5::Quick
+   Qt5::HttpServer
    screen_capture_lite
    mbedtls
-   mbedx509
-   mbedcrypto
 )
 
 #screen_capture_lite additional requirements
@@ -148,10 +57,32 @@ if(WIN32)
    set(LIBRARIES
       ${LIBRARIES}
       Dwmapi
-	  wsock32
-	  ws2_32
-	  legacy_stdio_definitions
    )
+elseif(APPLE)
+   find_library(corefoundation_lib CoreFoundation)
+   find_library(cocoa_lib Cocoa)
+   find_library(coremedia_lib CoreMedia)
+   find_library(avfoundation_lib AVFoundation)
+   find_library(coregraphics_lib CoreGraphics)
+   find_library(corevideo_lib CoreVideo)
+
+   set(LIBRARIES
+      ${LIBRARIES}
+      ${corefoundation_lib}
+      ${cocoa_lib}
+      ${coremedia_lib}
+      ${avfoundation_lib}
+      ${coregraphics_lib}
+      ${corevideo_lib}
+   )
+    set(SOURCES
+        ${SOURCES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/mac/screencapture.mm
+    )
+    set(HEADERS
+        ${HEADERS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/mac/screencapture.h
+    )
 elseif(LINUX)
 	set(LIBRARIES
       ${LIBRARIES}
@@ -163,55 +94,5 @@ elseif(LINUX)
    )
 endif()
 
-add_executable(huestacean WIN32 ${MAIN_SOURCE} ${SOURCES} ${HEADERS} ${HEADERS_MOC} resources/qml.qrc resources/resources.rc)
+add_executable(huestacean WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS} ${HEADERS_MOC} qml.qrc)
 target_link_libraries(huestacean ${LIBRARIES})
-
-add_custom_command(
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/rep_frontend.rep
-  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/include/frontend/rep_frontend.h
-  COMMAND repc -o merged rep_frontend.rep rep_frontend.h
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/frontend
-  COMMENT "compile with repc"
-)
-
-### Tests
-
-enable_testing()
-
-find_package(Qt5Test REQUIRED)
-include_directories(
-	${Qt5Test_INCLUDES}
-)
-
-# Prepare "Catch" library for other executables
-set(CATCH_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests/catch)
-add_library(Catch INTERFACE)
-target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
-
-set(TEST_SOURCES
-	${SOURCES}
-
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/testsmain.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/backendtests.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/mathtests.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/huetests.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/tests/razertests.cpp
-)
-
-set(TEST_HEADERS
-	${HEADERS}
-	${HEADERS_MOC}
-)
-
-set(TEST_LIBRARIES
-   ${LIBRARIES}
-   Catch
-   Qt5::Test
-)
-
-# Make test executable
-add_executable(huestacean_tests ${TEST_SOURCES} ${TEST_HEADERS})
-target_link_libraries(huestacean_tests ${TEST_LIBRARIES})
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/tests/catch/cmake/Catch.cmake)
-catch_discover_tests(huestacean_tests)

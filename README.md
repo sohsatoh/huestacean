@@ -9,7 +9,7 @@ Philips Hue screen syncing app for Desktop. Uses Philips' new Entertainment API 
 Downloadable binaries for Windows and macOS are available on the **[Releases](https://github.com/BradyBrenot/huestacean/releases)** page; see [Installing](#installing) for more information. It ought to also be possible to build the source for Linux but this has not yet been tested, see ***Building*** below.
 
 ## Safety notice
-This software can cause rapid flickering of your Hue lights that may trigger photosensitive epileptic seizures in vulnerable individuals, including those who have never experienced epilepsy or seizure symptoms previously. ***DO NOT*** use this if you are or suspect you are affected by photosensitive epilepsy, or are otherwise photosensitive, epileptic, or suffer from seizures generally. Cease use immediately and consult a doctor if you suffer from any seizure symptoms, which may include lightheadedness, altered vision, eye or face twitching, jerking or shaking of arms or legs, disorientation, confusion, or momentary loss of awareness.
+This software can cause rapid flickering of your Hue lights that may trigger photosensitive epileptic seizures in vulnerable individuals. ***DO NOT*** use this if you are or suspect you are affected by photosensitive epilepsy, or are otherwise photosensitive, epileptic, or suffer from seizures generally. Cease use immediately and consult a doctor if you suffer from any seizure symptoms, which may include lightheadedness, altered vision, eye or face twitching, jerking or shaking of arms or legs, disorientation, confusion, or momentary loss of awareness.
 
 ## General notes
 
@@ -63,8 +63,6 @@ Use this repository's [Issues](https://github.com/BradyBrenot/huestacean/issues)
 ----
 
 ## Building
-Major development is presently active on the master branch, you'll need to use a previous [Release](https://github.com/BradyBrenot/huestacean/releases) to build a working copy of Huestacean at the moment.
-
 ### Dependencies
 * Qt 5.10
 * CMake 3.9
@@ -144,7 +142,7 @@ Use `macdeployqt` to copy in the necessary Frameworks and other files.
 ```
 
 ### Linux
-1. Make sure you have Qt5 >= 5.10.0 and cmake installed.  If not, use your package manager to install them, e.g. `yum install cmake` or `pacman -S cmake`. You can also install Qt5 from the [offical website](http://download.qt.io/official_releases/qt/) if the correct version is not available in your package manager.
+1. Make sure you have Qt5 and cmake installed.  If not, use your package manager to install them, e.g. `yum install cmake` or `pacman -S cmake`
 2. Clone the Huestacean project and make sure all submodules are up to date.
 ```
 git clone --recursive git://github.com/BradyBrenot/huestacean.git
@@ -154,7 +152,7 @@ cd huestacean
 git submodule sync
 git submodule update --init --recursive
 ```
-3. Use cmake to build Huestacean, or build it with QtCreator.
+3. Use cmake to build Huestacean.
 ```
 mkdir build
 cd build
@@ -171,10 +169,14 @@ This project is using:
 
 ## License
 
-The source code for this application is licensed under the Apache License Version 2.0. All code, excepting what's in the thirdparty directory, should be assumed to be under this license unless stated otherwise, regardless of being tagged with the Apache 2.0 boilerplate or not. Refer to the [LICENSE](LICENSE) file for the text of the license and other details.
+Refer to the [LICENSE](LICENSE) file for license info.
 
 ### Third-party licenses
 
-This software makes use of open source software under various licenses, which may be found in the **thirdparty/licenses** directory.
+This software makes use of open source software under various licenses, which may be found in the **third_party_licenses** directory.
 
-Further details can be found at the bottom of the [LICENSE](LICENSE) file, under the text of the Apache License Version 2.0.
+* Qt: lgpl-3.txt, gpl-3.txt, Qt_ThirdPartySoftware_Listing.txt
+* screen_capture_lite: license-screen_capture_lite.txt
+* mbedtls and grafika: apache-2.0.txt
+
+This software uses Qt 5, which is licensed under the GNU Lesser General Public License v3.0. The text of the license can be found in [lgpl-3.txt](third_party_licenses/lgpl-3.txt). The corresponding source code for Qt can be found [on their website](https://www.qt.io/download), or at https://s3.us-east-2.amazonaws.com/bbrenot-thirdparty-sourcecode/qt-everywhere-src-5.10.0.tar.xz ; the end user can provide their own Qt5 and modifications by replacing the distributed Qt shared library files (Qt* .dll, .so, .dylib, etc.)
