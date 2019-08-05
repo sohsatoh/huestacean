@@ -331,7 +331,9 @@ signals:
 
 public slots:
     void onConnect();
+    void acceptError(QAbstractSocket::SocketError socketError);
 
 private:
     QTcpServer *server;
+    QTcpSocket *socket;
 };

@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QFontDatabase>
 #include <QQmlContext>
@@ -7,6 +7,7 @@
 #include <QTcpSocket>
 #include <QTcpServer>
 #include <QDebug>
+#include <QMessageBox>
 
 
 
@@ -42,6 +43,8 @@ MyTcpServer::MyTcpServer(QObject *parent) :
     connect(server, SIGNAL(newConnection()),
             this, SLOT(onConnect()));
 
+    connect(server, SIGNAL(acceptError(QAbstractSocket::SocketError)), this, SLOT(acceptError(QAbstractSocket::SocketError)));
+
     if(!server->listen(QHostAddress::LocalHost, 8989))
     {
         qDebug() << "Server could not start";
@@ -57,7 +60,7 @@ void MyTcpServer::onConnect()
     qDebug() << "CONNECTED";
 
     // need to grab the socket
-    QTcpSocket *socket = server->nextPendingConnection();
+    socket = server->nextPendingConnection();
 
     const char* response =
         "HTTP/1.1 200 OK\r\n"
@@ -76,7 +79,7 @@ void MyTcpServer::onConnect()
     socket->waitForBytesWritten();
 
     socket->close();
-    delete socket;
+    // delete socket;
 
     QString buttonTitle = qmlObject->property("text").toString();
 
@@ -92,6 +95,18 @@ void MyTcpServer::onConnect()
     else {
         qDebug() << "Skipped";
     }
+}
+
+void MyTcpServer::acceptError(QAbstractSocket::SocketError socketError)
+{
+    QMessageBox msgBox;
+
+    QString errorMessage = socket->errorString();
+
+    msgBox.setText(errorMessage);
+    msgBox.exec();
+
+    socket->close();
 }
 
 
@@ -112,7 +127,7 @@ int main(int argc, char *argv[])
         QCoreApplication::setOrganizationDomain("bradybrenot.com");
         QCoreApplication::setApplicationName("Huestacean");
 
-        QGuiApplication app(argc, argv);
+        QApplication app(argc, argv);
 
         qmlRegisterSingletonType<Huestacean>("Huestacean", 1, 0, "Huestacean", huestacean_singleton_provider);
 
