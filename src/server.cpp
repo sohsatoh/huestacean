@@ -104,10 +104,6 @@ Server::Server(QWidget *parent)
     hideButton->setAutoDefault(false);
     connect(hideButton, &QAbstractButton::clicked, this, &QWidget::close);
 
-    auto neverShowButton = new QPushButton(tr("Never Show"));
-    neverShowButton->setAutoDefault(false);
-    connect(neverShowButton, &QAbstractButton::clicked, this, &QWidget::close);
-
     //! [3]
     connect(tcpServer, &QTcpServer::newConnection, this, &Server::sendFortune);
     //! [3]
@@ -116,7 +112,6 @@ Server::Server(QWidget *parent)
     buttonLayout->addStretch(1);
     buttonLayout->addWidget(hideButton);
     buttonLayout->addStretch(1);
-    buttonLayout->addWidget(neverShowButton);
 
 
     QVBoxLayout *mainLayout = nullptr;
@@ -184,6 +179,8 @@ void Server::sessionOpened()
     statusLabel->setText(tr("The server is running on\n\nIP: %1\nport: %2")
                          .arg(ipAddress).arg(tcpServer->serverPort()));
 //! [1]
+
+    QTimer::singleShot(3 * 1000, this, SLOT(hideView()));
 }
 
 //! [4]
@@ -232,4 +229,8 @@ void Server::sendFortune()
     else {
         qDebug() << "Skipped";
     }
+}
+
+void Server::hideView() {
+    QWidget::close();
 }

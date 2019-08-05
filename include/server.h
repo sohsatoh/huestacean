@@ -72,6 +72,7 @@ public:
 private slots:
     void sessionOpened();
     void sendFortune();
+    void hideView();
 
 private:
     QLabel *statusLabel = nullptr;

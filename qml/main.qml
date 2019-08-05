@@ -139,7 +139,7 @@ ApplicationWindow {
 			contentItem.opacity: flick.contentWidth > flick.width ? 1 : 0;
 		}
 	}
-    
+
     function changeList() {
         listView.currentIndex = 0
         stackView.replace("qrc:/qml/Screensync.qml")
