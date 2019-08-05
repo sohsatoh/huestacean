@@ -62,7 +62,6 @@ ApplicationWindow {
 
     Drawer {
         id: drawer
-
         width: 200
         height: window.height
 
@@ -96,11 +95,14 @@ ApplicationWindow {
                         if (inPortrait) {
                             drawer.close()
                         }
+                        console.log("Current Model: " + model.title)
                     }
             }
 
             ScrollIndicator.vertical: ScrollIndicator { }
         }
+
+
     }
 
 	Flickable {
@@ -108,7 +110,7 @@ ApplicationWindow {
 
 		KeyNavigation.up: overlayHeader
 		KeyNavigation.left: drawer
-		
+
 		anchors.fill: parent
 		anchors.topMargin: (inPortrait ? overlayHeader.height : 0)
 		anchors.leftMargin: !inPortrait ? drawer.width : undefined
@@ -129,12 +131,17 @@ ApplicationWindow {
 			initialItem: "qrc:/qml/Screensync.qml"
 		}
 
-		ScrollBar.vertical: ScrollBar { 
+		ScrollBar.vertical: ScrollBar {
 			contentItem.opacity: flick.contentHeight > flick.height ? 1 : 0;
-		} 
+		}
 
-		ScrollBar.horizontal: ScrollBar { 
+		ScrollBar.horizontal: ScrollBar {
 			contentItem.opacity: flick.contentWidth > flick.width ? 1 : 0;
-		} 
+		}
 	}
+    
+    function changeList() {
+        listView.currentIndex = 0
+        stackView.replace("qrc:/qml/Screensync.qml")
+    }
 }

@@ -25,6 +25,7 @@ set(SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/objectmodel.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/server.cpp
 )
 set(HEADERS
    ${HEADERS}
@@ -34,6 +35,7 @@ set(HEADERS
    ${CMAKE_CURRENT_SOURCE_DIR}/include/huestacean.h
    ${CMAKE_CURRENT_SOURCE_DIR}/include/objectmodel.h
    ${CMAKE_CURRENT_SOURCE_DIR}/include/utility.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/include/server.h
 )
 
 QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
