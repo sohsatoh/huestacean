@@ -71,7 +71,8 @@ public:
 
 private slots:
     void sessionOpened();
-    void sendFortune();
+    void connected();
+    void readyRead();
     void hideView();
 
 private:

@@ -59,6 +59,7 @@
 #include "huestacean.h"
 
 QString buttonTitle;
+char* response;
 
 Server::Server(QWidget *parent)
     : QDialog(parent)
@@ -105,7 +106,7 @@ Server::Server(QWidget *parent)
     connect(hideButton, &QAbstractButton::clicked, this, &QWidget::close);
 
     //! [3]
-    connect(tcpServer, &QTcpServer::newConnection, this, &Server::sendFortune);
+    connect(tcpServer, &QTcpServer::newConnection, this, &Server::connected);
     //! [3]
 
     auto buttonLayout = new QHBoxLayout;
@@ -184,52 +185,81 @@ void Server::sessionOpened()
 }
 
 //! [4]
-void Server::sendFortune()
+void Server::connected()
 {
-    //Avoid a crash when the current list is not ScreenSync
-    QMetaObject::invokeMethod(rootObject, "changeList");
-
-    qDebug() << "Connected";
-
-    QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
-    connect(clientConnection, &QAbstractSocket::disconnected,
-            clientConnection, &QObject::deleteLater);
-//! [7] //! [8]
-
-    const char* response =
-        "HTTP/1.1 200 OK\r\n"
-        "Connection: close\r\n"
-        "Access-Control-Allow-Origin: *\r\n"
-        "Access-Control-Allow-Headers: Content-Type\r\n"
-        "Content-Type: text/html; charset=UTF-8\r\n"
-        "\r\n"
-        "<html><head><title>Fortune Server</title></head>"
-        "<body><p>Start sync...</p></body>"
-        "</html>"
-    ;
-
-    clientConnection->write(response);
-    clientConnection->disconnectFromHost();
-
-    QObject *qmlObject = rootObject->findChild<QObject*>("syncButton");
-
-
-
-    buttonTitle = qmlObject->property("text").toString();
-
-    if ( buttonTitle.contains("Start", Qt::CaseInsensitive) != 0 ) {
-        QEvent evtPress(QEvent::MouseButtonPress);
-        QEvent evtRelease(QEvent::MouseButtonRelease);
-
-        qmlObject->event(&evtPress);
-        qmlObject->event(&evtRelease);
-
-        qDebug() << "Start Sync";
-    }
-    else {
-        qDebug() << "Skipped";
+    while (tcpServer->hasPendingConnections())
+    {
+        QTcpSocket *socket = tcpServer->nextPendingConnection();
+        connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
+        connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
     }
 }
+
+void Server::readyRead() {
+    QMetaObject::invokeMethod(rootObject, "changeList");
+
+    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
+    QStringList tokens = QString(socket->readLine()).split(QRegExp("[ \r\n][ \r\n]*"));
+
+    QObject *qmlObject = rootObject->findChild<QObject*>("syncButton");
+    buttonTitle = qmlObject->property("text").toString();
+
+    if ( tokens[1].contains("start", Qt::CaseInsensitive) != 0 ) {
+        response =
+            "HTTP/1.1 200 OK\r\n"
+            "Connection: close\r\n"
+            "Access-Control-Allow-Origin: *\r\n"
+            "Access-Control-Allow-Headers: Content-Type\r\n"
+            "Content-Type: text/html; charset=UTF-8\r\n"
+            "\r\n"
+            "<html><head><title>Fortune Server</title></head>"
+            "<body><p>Start sync...</p></body>"
+            "</html>"
+        ;
+        if (buttonTitle.contains("Start", Qt::CaseInsensitive) != 0 ) {
+            QEvent evtPress(QEvent::MouseButtonPress);
+            QEvent evtRelease(QEvent::MouseButtonRelease);
+
+            qmlObject->event(&evtPress);
+            qmlObject->event(&evtRelease);
+
+            qDebug() << "Start Sync";
+        }
+        else {
+            qDebug() << "Skipped";
+        }
+    }
+    else {
+        response =
+            "HTTP/1.1 200 OK\r\n"
+            "Connection: close\r\n"
+            "Access-Control-Allow-Origin: *\r\n"
+            "Access-Control-Allow-Headers: Content-Type\r\n"
+            "Content-Type: text/html; charset=UTF-8\r\n"
+            "\r\n"
+            "<html><head><title>Fortune Server</title></head>"
+            "<body><p>Stop sync...</p></body>"
+            "</html>"
+        ;
+        if ( buttonTitle.contains("Stop", Qt::CaseInsensitive) != 0 ) {
+            QEvent evtPress(QEvent::MouseButtonPress);
+            QEvent evtRelease(QEvent::MouseButtonRelease);
+
+            qmlObject->event(&evtPress);
+            qmlObject->event(&evtRelease);
+
+            qDebug() << "Stop Sync";
+        }
+        else {
+            qDebug() << "Skipped";
+        }
+    }
+
+    socket->write(response);
+    socket->disconnectFromHost();
+}
+    // connect(clientConnection, &QAbstractSocket::disconnected,
+    //         clientConnection, &QObject::deleteLater);
 
 void Server::hideView() {
     QWidget::close();
