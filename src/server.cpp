@@ -52,7 +52,7 @@
 #include <QtNetwork>
 #include <QtCore>
 
-
+#include <QMessageBox>
 
 
 #include "server.h"
@@ -61,13 +61,9 @@
 QString buttonTitle;
 char* response;
 
-Server::Server(QWidget *parent)
-    : QDialog(parent)
-    , statusLabel(new QLabel)
+Server::Server(QObject *parent)
+    : QObject(parent)
 {
-    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-    statusLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-
     QNetworkConfigurationManager manager;
     if (manager.capabilities() & QNetworkConfigurationManager::NetworkSessionRequired) {
         // Get saved network configuration
@@ -86,60 +82,18 @@ Server::Server(QWidget *parent)
         networkSession = new QNetworkSession(config, this);
         connect(networkSession, &QNetworkSession::opened, this, &Server::sessionOpened);
 
-        statusLabel->setText(tr("Opening network session."));
         networkSession->open();
     } else {
         sessionOpened();
     }
 
-    //! [2]
-    // fortunes << tr("You've been leading a dog's life. Stay off the furniture.")
-    //          << tr("You've got to think about tomorrow.")
-    //          << tr("You will be surprised by a loud noise.")
-    //          << tr("You will feel hungry again in another hour.")
-    //          << tr("You might have mail.")
-    //          << tr("You cannot kill time without injuring eternity.")
-    //          << tr("Computers are not intelligent. They only think they are.");
-    //! [2]
-    auto hideButton = new QPushButton(tr("Hide"));
-    hideButton->setAutoDefault(false);
-    connect(hideButton, &QAbstractButton::clicked, this, &QWidget::close);
-
-    //! [3]
     connect(tcpServer, &QTcpServer::newConnection, this, &Server::connected);
-    //! [3]
+    connect(tcpServer, &QTcpServer::serverError, this, &Server::error);
 
-    auto buttonLayout = new QHBoxLayout;
-    buttonLayout->addStretch(1);
-    buttonLayout->addWidget(hideButton);
-    buttonLayout->addStretch(1);
-
-
-    QVBoxLayout *mainLayout = nullptr;
-    if (QGuiApplication::styleHints()->showIsFullScreen() || QGuiApplication::styleHints()->showIsMaximized()) {
-        auto outerVerticalLayout = new QVBoxLayout(this);
-        outerVerticalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding));
-        auto outerHorizontalLayout = new QHBoxLayout;
-        outerHorizontalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Ignored));
-        auto groupBox = new QGroupBox(QGuiApplication::applicationDisplayName());
-        mainLayout = new QVBoxLayout(groupBox);
-        outerHorizontalLayout->addWidget(groupBox);
-        outerHorizontalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::MinimumExpanding, QSizePolicy::Ignored));
-        outerVerticalLayout->addLayout(outerHorizontalLayout);
-        outerVerticalLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Ignored, QSizePolicy::MinimumExpanding));
-    } else {
-        mainLayout = new QVBoxLayout(this);
-    }
-
-    mainLayout->addWidget(statusLabel);
-    mainLayout->addLayout(buttonLayout);
-
-    setWindowTitle(QGuiApplication::applicationDisplayName());
 }
 
 void Server::sessionOpened()
 {
-    // Save the used configuration
     if (networkSession) {
         QNetworkConfiguration config = networkSession->configuration();
         QString id;
@@ -154,16 +108,19 @@ void Server::sessionOpened()
         settings.endGroup();
     }
 
-//! [0] //! [1]
+    //Read Settings
+    QSettings settings;
+    settings.beginGroup("Server");
+    savedPortNum = settings.value("savedPortNum", "8989").toInt();
+    settings.endGroup();
+
     tcpServer = new QTcpServer(this);
-    if (!tcpServer->listen(QHostAddress::LocalHost, 8989)) {
-        QMessageBox::critical(this, tr("Fortune Server"),
-                              tr("Unable to start the server: %1.")
-                              .arg(tcpServer->errorString()));
-        close();
+    if (!tcpServer->listen(QHostAddress::LocalHost, savedPortNum)) {
         return;
     }
-//! [0]
+
+    port = tcpServer->serverPort();
+
     QString ipAddress;
     QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
     // use the first non-localhost IPv4 address
@@ -174,14 +131,12 @@ void Server::sessionOpened()
             break;
         }
     }
+
     // if we did not find one, use IPv4 localhost
     if (ipAddress.isEmpty())
         ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
-    statusLabel->setText(tr("The server is running on\n\nIP: %1\nport: %2")
-                         .arg(ipAddress).arg(tcpServer->serverPort()));
-//! [1]
 
-    QTimer::singleShot(3 * 1000, this, SLOT(hideView()));
+
 }
 
 //! [4]
@@ -258,9 +213,41 @@ void Server::readyRead() {
     socket->write(response);
     socket->disconnectFromHost();
 }
-    // connect(clientConnection, &QAbstractSocket::disconnected,
-    //         clientConnection, &QObject::deleteLater);
 
-void Server::hideView() {
-    QWidget::close();
+void Server::setPort(int portNum) {
+    //save portNum to setSavedPortNum
+    QSettings settings;
+    settings.beginGroup("Server");
+    settings.setValue("savedPortNum",portNum);
+    settings.endGroup();
+    restart();
+}
+
+void Server::restart() {
+    QSettings settings;
+    settings.beginGroup("Server");
+    savedPortNum = settings.value("savedPortNum", "8989").toInt();
+    settings.endGroup();
+
+    tcpServer->close();
+
+    port = tcpServer->serverPort();
+
+    tcpServer->listen(QHostAddress::LocalHost, savedPortNum);
+
+    QString msg = "Restarted the Server";
+    QMessageBox Msgbox;
+    Msgbox.setText(msg);
+    Msgbox.exec();
+}
+
+//Catch Error
+void Server::error() {
+    QString msg = tcpServer->errorString();
+
+    QMessageBox Msgbox;
+    Msgbox.setText(msg);
+    Msgbox.exec();
+
+    restart();
 }

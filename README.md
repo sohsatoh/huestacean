@@ -13,6 +13,8 @@ Access localhost:8989/start to start sync, and access localhost:8989/stop to sto
 
 I will not add the web gui as this fork does not intend to release. 
 
+<img src="https://i.imgur.com/A0F3jMZ.png" width="500px">
+
 ## Download
 Downloadable binaries for Windows and macOS are available on the **[Releases](https://github.com/BradyBrenot/huestacean/releases)** page; see [Installing](#installing) for more information. It ought to also be possible to build the source for Linux but this has not yet been tested, see ***Building*** below.
 

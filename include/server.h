@@ -54,32 +54,50 @@
 #include <QDialog>
 #include <QString>
 #include <QVector>
+#include <QObject>
 
 QT_BEGIN_NAMESPACE
-class QLabel;
 class QTcpServer;
 class QNetworkSession;
 QT_END_NAMESPACE
 
 //! [0]
-class Server : public QDialog
+class Server : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(int port READ getPort NOTIFY onInit)
 
 public:
-    explicit Server(QWidget *parent = nullptr);
+    explicit Server(QObject *parent = nullptr);
+
+    Q_INVOKABLE void restart();
+
+    Q_INVOKABLE void manuallySetPort(int portNum) {
+        setPort(portNum);
+    }
+
+    int getPort() const {
+        return port;
+    }
+
+    int port;
+
+signals:
+    void onInit();
+
 
 private slots:
     void sessionOpened();
     void connected();
     void readyRead();
-    void hideView();
+    void error();
+    void setPort(int portNum);
+
 
 private:
-    QLabel *statusLabel = nullptr;
     QTcpServer *tcpServer = nullptr;
-    // QVector<QString> fortunes;
     QNetworkSession *networkSession = nullptr;
+    int savedPortNum;
 };
 
 #endif

@@ -4,6 +4,7 @@ import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import QtQuick.Window 2.2
 import Huestacean 1.0
+import Server 1.0
 import "qrc:/qml"
 
 Pane {
@@ -247,6 +248,37 @@ Pane {
 					}
 				}
 			}
+
+            RowLayout {
+                spacing: 10
+
+                Button {
+                    id:restartButton
+                    objectName: "restartButton"
+                    text: "Restart Server"
+                    onClicked:Server.restart
+                }
+
+                Button {
+                    id: saveServerPort
+                    text: "Save Port Number"
+                    onClicked: Server.manuallySetPort(serverPort.text)
+                }
+
+                Label {
+                    id: serverPortLabel
+                    font.bold: false
+                    text: "Port :"
+                }
+
+                TextField {
+                    id: serverPort
+                    focus: true
+                    width: 150
+                    text: Server.port
+                }
+
+            }
 
 			RowLayout {
 				spacing: 20

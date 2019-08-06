@@ -34,6 +34,15 @@ static QObject *huestacean_singleton_provider(QQmlEngine *engine, QJSEngine *scr
         return huestacean;
 }
 
+static QObject *server_singleton_provider(QQmlEngine *engine, QJSEngine *scriptEngine)
+{
+        Q_UNUSED(engine);
+        Q_UNUSED(scriptEngine);
+
+        Server *server = new Server();
+        return server;
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -55,6 +64,7 @@ int main(int argc, char *argv[])
         QApplication app(argc, argv);
 
         qmlRegisterSingletonType<Huestacean>("Huestacean", 1, 0, "Huestacean", huestacean_singleton_provider);
+        qmlRegisterSingletonType<Server>("Server", 1, 0, "Server", server_singleton_provider);
 
         const QFont fixedFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
 
@@ -69,9 +79,6 @@ int main(int argc, char *argv[])
         theEngine.rootContext()->setContextProperty("mainWindow", theEngine.rootObjects().first());
 
         rootObject = theEngine.rootObjects().first();
-
-        Server server;
-        server.show();
 
         return app.exec();
 }
