@@ -6,6 +6,10 @@ Philips Hue screen syncing app for Desktop. Uses Philips' new Entertainment API 
 <img src="https://i.imgur.com/H67w2ta.png" alt="Youtube video demonstrating Huestacean's screen sync feature" border="0" width="250px" />
 
 ## Changes from original
+- Local server
+- Minimize at startup
+- Show a task icon
+
 What I added is the webserver to start/stop sync.
 With the default settings, it listens 8989 port.
 
@@ -13,7 +17,7 @@ Access localhost:8989/start to start sync, and access localhost:8989/stop to sto
 
 I will not add the web gui as this fork does not intend to release. 
 
-<img src="https://i.imgur.com/A0F3jMZ.png" width="500px">
+<img src="https://i.imgur.com/3UayLKP.png" width="500px">
 
 ## Download
 Downloadable binaries for Windows and macOS are available on the **[Releases](https://github.com/BradyBrenot/huestacean/releases)** page; see [Installing](#installing) for more information. It ought to also be possible to build the source for Linux but this has not yet been tested, see ***Building*** below.
