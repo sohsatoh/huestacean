@@ -11,13 +11,14 @@ import Qt.labs.settings 1.0
 Pane {
     id: home
 
-	contentWidth: mainColumn.implicitWidth
+	  contentWidth: mainColumn.implicitWidth
     contentHeight: mainColumn.implicitHeight
 
     Settings {
         id: settings
         property alias hide: hideatstartup.checked
         property alias visualizer: entimagepreview.checked
+        property alias showTaskIcon: showtaskicon.checked
     }
 
     ColumnLayout {
@@ -186,11 +187,17 @@ Pane {
 
 				}
 
-                CheckBox {
-                    id:hideatstartup
-                    text: "Hide at startup"
-                    checked: settings.hide
-                }
+        CheckBox {
+            id:hideatstartup
+            text: "Hide at startup"
+            checked: settings.hide
+        }
+
+        CheckBox {
+            id:showtaskicon
+            text: "Show on taskbar"
+            checked: settings.showTaskIcon
+        }
 
 				Label {
 					text: "Frame read:" + Huestacean.frameReadElapsed + "ms"
