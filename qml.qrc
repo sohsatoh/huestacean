@@ -4,6 +4,7 @@
         <file>qtquickcontrols2.conf</file>
         <file>images/hamburger.png</file>
         <file>images/egroup-xy.png</file>
+        <file>images/icon.png</file>
         <file>qml/Bridges.qml</file>
         <file>qml/About.qml</file>
         <file>qml/Screensync.qml</file>

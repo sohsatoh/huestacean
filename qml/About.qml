@@ -17,6 +17,13 @@ Pane {
 			text: 'Copyright 2018 Brady Brenot'
 		}
 
+        Label {
+			text: 'Modified by Soh Satoh: <a href="https://github.com/sohsatoh/huestacean">https://github.com/sohsatoh/huestacean</a>'
+			anchors.margins: 20
+			wrapMode: Label.Wrap
+
+			onLinkActivated: Qt.openUrlExternally(link)
+		}
 		Label {
 			text: 'Huestacean on GitHub: <a href="https://github.com/BradyBrenot/huestacean">https://github.com/BradyBrenot/huestacean</a>'
 			anchors.margins: 20

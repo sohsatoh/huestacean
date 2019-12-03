@@ -9,6 +9,10 @@
 #include <QDebug>
 #include <QMessageBox>
 
+#include <QAction>
+#include <QMenu>
+#include <QSystemTrayIcon>
+#include <QSettings>
 
 
 
@@ -63,6 +67,10 @@ int main(int argc, char *argv[])
 
         QApplication app(argc, argv);
 
+        if (QSystemTrayIcon::isSystemTrayAvailable()) {
+                QApplication::setQuitOnLastWindowClosed(false);
+        }
+
         qmlRegisterSingletonType<Huestacean>("Huestacean", 1, 0, "Huestacean", huestacean_singleton_provider);
         qmlRegisterSingletonType<Server>("Server", 1, 0, "Server", server_singleton_provider);
 
@@ -79,6 +87,32 @@ int main(int argc, char *argv[])
         theEngine.rootContext()->setContextProperty("mainWindow", theEngine.rootObjects().first());
 
         rootObject = theEngine.rootObjects().first();
+
+        if (QSystemTrayIcon::isSystemTrayAvailable()) {
+                QAction *showAction = new QAction(QObject::tr("&Show"), rootObject);
+                rootObject->connect(showAction, SIGNAL(triggered()), rootObject, SLOT(showNormal()));
+                QAction *hideAction = new QAction(QObject::tr("&Hide"), rootObject);
+                rootObject->connect(hideAction, SIGNAL(triggered()), rootObject, SLOT(hide()));
+                QAction *quitAction = new QAction(QObject::tr("&Quit"), rootObject);
+                rootObject->connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+
+                QMenu *trayIconMenu = new QMenu();
+                trayIconMenu->addAction(showAction);
+                trayIconMenu->addAction(hideAction);
+                trayIconMenu->addSeparator();
+                trayIconMenu->addAction(quitAction);
+
+                QSystemTrayIcon *trayIcon = new QSystemTrayIcon(rootObject);
+                trayIcon->setContextMenu(trayIconMenu);
+                trayIcon->setIcon(QIcon(":images/icon.png"));
+                trayIcon->show();
+
+                QSettings settings;
+                int shouldMinimize = settings.value("hide").toInt();
+                if(shouldMinimize){
+                    QTimer::singleShot(0.25 * 1000, rootObject, SLOT(hide()));
+                }
+        }
 
         return app.exec();
 }

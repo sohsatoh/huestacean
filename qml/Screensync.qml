@@ -6,12 +6,19 @@ import QtQuick.Window 2.2
 import Huestacean 1.0
 import Server 1.0
 import "qrc:/qml"
+import Qt.labs.settings 1.0
 
 Pane {
     id: home
 
 	contentWidth: mainColumn.implicitWidth
     contentHeight: mainColumn.implicitHeight
+
+    Settings {
+        id: settings
+        property alias hide: hideatstartup.checked
+        property alias visualizer: entimagepreview.checked
+    }
 
     ColumnLayout {
 		id: mainColumn
@@ -173,11 +180,17 @@ Pane {
 				CheckBox {
 					id:entimagepreview
 					text: "Fast visualizer"
-					checked: false
+					checked: settings.visualizer
 
 					KeyNavigation.down: startSyncButton
 
 				}
+
+                CheckBox {
+                    id:hideatstartup
+                    text: "Hide at startup"
+                    checked: settings.hide
+                }
 
 				Label {
 					text: "Frame read:" + Huestacean.frameReadElapsed + "ms"
@@ -250,6 +263,21 @@ Pane {
 			}
 
             RowLayout {
+                Label {
+                    id: serverPortLabel
+                    font.bold: false
+                    text: "Port :"
+                }
+
+                TextField {
+                    id: serverPort
+                    focus: true
+                    width: 150
+                    text: Server.port
+                }
+            }
+
+            RowLayout {
                 spacing: 10
 
                 Button {
@@ -263,19 +291,6 @@ Pane {
                     id: saveServerPort
                     text: "Save Port Number"
                     onClicked: Server.manuallySetPort(serverPort.text)
-                }
-
-                Label {
-                    id: serverPortLabel
-                    font.bold: false
-                    text: "Port :"
-                }
-
-                TextField {
-                    id: serverPort
-                    focus: true
-                    width: 150
-                    text: Server.port
                 }
 
             }
