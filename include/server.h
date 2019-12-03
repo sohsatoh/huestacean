@@ -85,7 +85,6 @@ public:
 signals:
     void onInit();
 
-
 private slots:
     void sessionOpened();
     void connected();

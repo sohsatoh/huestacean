@@ -51,6 +51,8 @@
 #include <QtWidgets>
 #include <QtNetwork>
 #include <QtCore>
+#include <QSettings>
+
 
 #include <QMessageBox>
 
@@ -62,79 +64,83 @@ QString buttonTitle;
 char* response;
 
 Server::Server(QObject *parent)
-    : QObject(parent)
+        : QObject(parent)
 {
-    QNetworkConfigurationManager manager;
-    if (manager.capabilities() & QNetworkConfigurationManager::NetworkSessionRequired) {
-        // Get saved network configuration
-        QSettings settings(QSettings::UserScope, QLatin1String("QtProject"));
-        settings.beginGroup(QLatin1String("QtNetwork"));
-        const QString id = settings.value(QLatin1String("DefaultNetworkConfiguration")).toString();
-        settings.endGroup();
+        QSettings settings;
+        int enableServer = settings.value("enableServer").toInt();
 
-        // If the saved network configuration is not currently discovered use the system default
-        QNetworkConfiguration config = manager.configurationFromIdentifier(id);
-        if ((config.state() & QNetworkConfiguration::Discovered) !=
-            QNetworkConfiguration::Discovered) {
-            config = manager.defaultConfiguration();
+        if(enableServer) {
+                QNetworkConfigurationManager manager;
+                if (manager.capabilities() & QNetworkConfigurationManager::NetworkSessionRequired) {
+                        // Get saved network configuration
+                        QSettings settings(QSettings::UserScope, QLatin1String("QtProject"));
+                        settings.beginGroup(QLatin1String("QtNetwork"));
+                        const QString id = settings.value(QLatin1String("DefaultNetworkConfiguration")).toString();
+                        settings.endGroup();
+
+                        // If the saved network configuration is not currently discovered use the system default
+                        QNetworkConfiguration config = manager.configurationFromIdentifier(id);
+                        if ((config.state() & QNetworkConfiguration::Discovered) !=
+                            QNetworkConfiguration::Discovered) {
+                                config = manager.defaultConfiguration();
+                        }
+
+                        networkSession = new QNetworkSession(config, this);
+                        connect(networkSession, &QNetworkSession::opened, this, &Server::sessionOpened);
+
+                        networkSession->open();
+                } else {
+                        sessionOpened();
+                }
+
+                connect(tcpServer, &QTcpServer::newConnection, this, &Server::connected);
+                connect(tcpServer, &QTcpServer::serverError, this, &Server::error);
         }
-
-        networkSession = new QNetworkSession(config, this);
-        connect(networkSession, &QNetworkSession::opened, this, &Server::sessionOpened);
-
-        networkSession->open();
-    } else {
-        sessionOpened();
-    }
-
-    connect(tcpServer, &QTcpServer::newConnection, this, &Server::connected);
-    connect(tcpServer, &QTcpServer::serverError, this, &Server::error);
-
 }
 
 void Server::sessionOpened()
 {
-    if (networkSession) {
-        QNetworkConfiguration config = networkSession->configuration();
-        QString id;
-        if (config.type() == QNetworkConfiguration::UserChoice)
-            id = networkSession->sessionProperty(QLatin1String("UserChoiceConfiguration")).toString();
-        else
-            id = config.identifier();
+        if (networkSession) {
+                QNetworkConfiguration config = networkSession->configuration();
+                QString id;
+                if (config.type() == QNetworkConfiguration::UserChoice)
+                        id = networkSession->sessionProperty(QLatin1String("UserChoiceConfiguration")).toString();
+                else
+                        id = config.identifier();
 
-        QSettings settings(QSettings::UserScope, QLatin1String("QtProject"));
-        settings.beginGroup(QLatin1String("QtNetwork"));
-        settings.setValue(QLatin1String("DefaultNetworkConfiguration"), id);
-        settings.endGroup();
-    }
-
-    //Read Settings
-    QSettings settings;
-    settings.beginGroup("Server");
-    savedPortNum = settings.value("savedPortNum", "8989").toInt();
-    settings.endGroup();
-
-    tcpServer = new QTcpServer(this);
-    if (!tcpServer->listen(QHostAddress::LocalHost, savedPortNum)) {
-        return;
-    }
-
-    port = tcpServer->serverPort();
-
-    QString ipAddress;
-    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
-    // use the first non-localhost IPv4 address
-    for (int i = 0; i < ipAddressesList.size(); ++i) {
-        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
-            ipAddressesList.at(i).toIPv4Address()) {
-            ipAddress = ipAddressesList.at(i).toString();
-            break;
+                QSettings settings(QSettings::UserScope, QLatin1String("QtProject"));
+                settings.beginGroup(QLatin1String("QtNetwork"));
+                settings.setValue(QLatin1String("DefaultNetworkConfiguration"), id);
+                settings.endGroup();
         }
-    }
 
-    // if we did not find one, use IPv4 localhost
-    if (ipAddress.isEmpty())
-        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+        //Read Settings
+        QSettings settings;
+        settings.beginGroup("Server");
+        savedPortNum = settings.value("savedPortNum", "8989").toInt();
+        settings.endGroup();
+
+        tcpServer = new QTcpServer(this);
+        if (!tcpServer->listen(QHostAddress::LocalHost, savedPortNum)) {
+                return;
+        }
+
+        port = tcpServer->serverPort();
+
+        QString ipAddress;
+        QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
+        // use the first non-localhost IPv4 address
+        for (int i = 0; i < ipAddressesList.size(); ++i) {
+                if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
+                    ipAddressesList.at(i).toIPv4Address()) {
+                        ipAddress = ipAddressesList.at(i).toString();
+                        break;
+                }
+        }
+
+        // if we did not find one, use IPv4 localhost
+        if (ipAddress.isEmpty())
+                ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
 
 
 }
@@ -142,112 +148,112 @@ void Server::sessionOpened()
 //! [4]
 void Server::connected()
 {
-    while (tcpServer->hasPendingConnections())
-    {
-        QTcpSocket *socket = tcpServer->nextPendingConnection();
-        connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
-        connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
-    }
+        while (tcpServer->hasPendingConnections())
+        {
+                QTcpSocket *socket = tcpServer->nextPendingConnection();
+                connect(socket, SIGNAL(readyRead()), SLOT(readyRead()));
+                connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
+        }
 }
 
 void Server::readyRead() {
-    QMetaObject::invokeMethod(rootObject, "changeList");
+        QMetaObject::invokeMethod(rootObject, "changeList");
 
-    QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
-    QStringList tokens = QString(socket->readLine()).split(QRegExp("[ \r\n][ \r\n]*"));
+        QTcpSocket *socket = static_cast<QTcpSocket*>(sender());
+        QStringList tokens = QString(socket->readLine()).split(QRegExp("[ \r\n][ \r\n]*"));
 
-    QObject *qmlObject = rootObject->findChild<QObject*>("syncButton");
-    buttonTitle = qmlObject->property("text").toString();
+        QObject *qmlObject = rootObject->findChild<QObject*>("syncButton");
+        buttonTitle = qmlObject->property("text").toString();
 
-    if ( tokens[1].contains("start", Qt::CaseInsensitive) != 0 ) {
-        response =
-            "HTTP/1.1 200 OK\r\n"
-            "Connection: close\r\n"
-            "Access-Control-Allow-Origin: *\r\n"
-            "Access-Control-Allow-Headers: Content-Type\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n"
-            "\r\n"
-            "<html><head><title>Fortune Server</title></head>"
-            "<body><p>Start sync...</p></body>"
-            "</html>"
-        ;
-        if (buttonTitle.contains("Start", Qt::CaseInsensitive) != 0 ) {
-            QEvent evtPress(QEvent::MouseButtonPress);
-            QEvent evtRelease(QEvent::MouseButtonRelease);
+        if ( tokens[1].contains("start", Qt::CaseInsensitive) != 0 ) {
+                response =
+                        "HTTP/1.1 200 OK\r\n"
+                        "Connection: close\r\n"
+                        "Access-Control-Allow-Origin: *\r\n"
+                        "Access-Control-Allow-Headers: Content-Type\r\n"
+                        "Content-Type: text/html; charset=UTF-8\r\n"
+                        "\r\n"
+                        "<html><head><title>Fortune Server</title></head>"
+                        "<body><p>Start sync...</p></body>"
+                        "</html>"
+                ;
+                if (buttonTitle.contains("Start", Qt::CaseInsensitive) != 0 ) {
+                        QEvent evtPress(QEvent::MouseButtonPress);
+                        QEvent evtRelease(QEvent::MouseButtonRelease);
 
-            qmlObject->event(&evtPress);
-            qmlObject->event(&evtRelease);
+                        qmlObject->event(&evtPress);
+                        qmlObject->event(&evtRelease);
 
-            qDebug() << "Start Sync";
+                        qDebug() << "Start Sync";
+                }
+                else {
+                        qDebug() << "Skipped";
+                }
         }
         else {
-            qDebug() << "Skipped";
-        }
-    }
-    else {
-        response =
-            "HTTP/1.1 200 OK\r\n"
-            "Connection: close\r\n"
-            "Access-Control-Allow-Origin: *\r\n"
-            "Access-Control-Allow-Headers: Content-Type\r\n"
-            "Content-Type: text/html; charset=UTF-8\r\n"
-            "\r\n"
-            "<html><head><title>Fortune Server</title></head>"
-            "<body><p>Stop sync...</p></body>"
-            "</html>"
-        ;
-        if ( buttonTitle.contains("Stop", Qt::CaseInsensitive) != 0 ) {
-            QEvent evtPress(QEvent::MouseButtonPress);
-            QEvent evtRelease(QEvent::MouseButtonRelease);
+                response =
+                        "HTTP/1.1 200 OK\r\n"
+                        "Connection: close\r\n"
+                        "Access-Control-Allow-Origin: *\r\n"
+                        "Access-Control-Allow-Headers: Content-Type\r\n"
+                        "Content-Type: text/html; charset=UTF-8\r\n"
+                        "\r\n"
+                        "<html><head><title>Fortune Server</title></head>"
+                        "<body><p>Stop sync...</p></body>"
+                        "</html>"
+                ;
+                if ( buttonTitle.contains("Stop", Qt::CaseInsensitive) != 0 ) {
+                        QEvent evtPress(QEvent::MouseButtonPress);
+                        QEvent evtRelease(QEvent::MouseButtonRelease);
 
-            qmlObject->event(&evtPress);
-            qmlObject->event(&evtRelease);
+                        qmlObject->event(&evtPress);
+                        qmlObject->event(&evtRelease);
 
-            qDebug() << "Stop Sync";
+                        qDebug() << "Stop Sync";
+                }
+                else {
+                        qDebug() << "Skipped";
+                }
         }
-        else {
-            qDebug() << "Skipped";
-        }
-    }
 
-    socket->write(response);
-    socket->disconnectFromHost();
+        socket->write(response);
+        socket->disconnectFromHost();
 }
 
 void Server::setPort(int portNum) {
-    //save portNum to setSavedPortNum
-    QSettings settings;
-    settings.beginGroup("Server");
-    settings.setValue("savedPortNum",portNum);
-    settings.endGroup();
-    restart();
+        //save portNum to setSavedPortNum
+        QSettings settings;
+        settings.beginGroup("Server");
+        settings.setValue("savedPortNum",portNum);
+        settings.endGroup();
+        restart();
 }
 
 void Server::restart() {
-    QSettings settings;
-    settings.beginGroup("Server");
-    savedPortNum = settings.value("savedPortNum", "8989").toInt();
-    settings.endGroup();
+        QSettings settings;
+        settings.beginGroup("Server");
+        savedPortNum = settings.value("savedPortNum", "8989").toInt();
+        settings.endGroup();
 
-    tcpServer->close();
+        tcpServer->close();
 
-    port = tcpServer->serverPort();
+        port = tcpServer->serverPort();
 
-    tcpServer->listen(QHostAddress::LocalHost, savedPortNum);
+        tcpServer->listen(QHostAddress::LocalHost, savedPortNum);
 
-    QString msg = "Restarted the Server";
-    QMessageBox Msgbox;
-    Msgbox.setText(msg);
-    Msgbox.exec();
+        QString msg = "Restarted the Server";
+        QMessageBox Msgbox;
+        Msgbox.setText(msg);
+        Msgbox.exec();
 }
 
 //Catch Error
 void Server::error() {
-    QString msg = tcpServer->errorString();
+        QString msg = tcpServer->errorString();
 
-    QMessageBox Msgbox;
-    Msgbox.setText(msg);
-    Msgbox.exec();
+        QMessageBox Msgbox;
+        Msgbox.setText(msg);
+        Msgbox.exec();
 
-    restart();
+        restart();
 }

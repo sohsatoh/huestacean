@@ -11,7 +11,7 @@ import Qt.labs.settings 1.0
 Pane {
     id: home
 
-	  contentWidth: mainColumn.implicitWidth
+    contentWidth: mainColumn.implicitWidth
     contentHeight: mainColumn.implicitHeight
 
     Settings {
@@ -19,268 +19,270 @@ Pane {
         property alias hide: hideatstartup.checked
         property alias visualizer: entimagepreview.checked
         property alias showTaskIcon: showtaskicon.checked
+        property alias enableServer: enableServer.checked
     }
 
     ColumnLayout {
-		id: mainColumn
-		spacing: 10
+        id: mainColumn
+        spacing: 10
 
-		Bridges {
-			visible: !hasAtLeastOneConnection
-		}
+        Bridges {
+            visible: !hasAtLeastOneConnection
+        }
 
-		ColumnLayout {
-			spacing: 10
+        ColumnLayout {
+            spacing: 10
 
-			RowLayout {
-				spacing: 20
+            RowLayout {
+                spacing: 20
 
-				ColumnLayout {
-					Layout.fillWidth: true
+                ColumnLayout {
+                    Layout.fillWidth: true
 
-					Label {
-						text: "Monitor"
-					}
+                    Label {
+                        text: "Monitor"
+                    }
 
-					RowLayout {
-						Button {
-							id:redetectButton
-							focus: true
-							text: "Redetect"
-							onClicked: Huestacean.detectMonitors()
+                    RowLayout {
+                        Button {
+                            id: redetectButton
+                            focus: true
+                            text: "Redetect"
+                            onClicked: Huestacean.detectMonitors()
 
-							KeyNavigation.right: monitorComboBox
-							KeyNavigation.down: entimagepreview
-						}
+                            KeyNavigation.right: monitorComboBox
+                            KeyNavigation.down: entimagepreview
+                        }
 
-						ComboBox {
-							id:monitorComboBox
-							Layout.fillWidth: true
-							Layout.maximumWidth: 200
+                        ComboBox {
+                            id: monitorComboBox
+                            Layout.fillWidth: true
+                            Layout.maximumWidth: 200
 
-							currentIndex: 0
-							model: Huestacean.monitorsModel
-							textRole: "asString"
-							onCurrentIndexChanged: Huestacean.setActiveMonitor(currentIndex)
+                            currentIndex: 0
+                            model: Huestacean.monitorsModel
+                            textRole: "asString"
+                            onCurrentIndexChanged: Huestacean.setActiveMonitor(
+                                                       currentIndex)
 
-							KeyNavigation.right: egroupRedetect
-							KeyNavigation.down: entimagepreview
-						}
-					}
+                            KeyNavigation.right: egroupRedetect
+                            KeyNavigation.down: entimagepreview
+                        }
+                    }
 
-					//Rectangle { height: 200; width: 300; }
+                    //Rectangle { height: 200; width: 300; }
+                    Image {
+                        id: entimage
+                        source: "image://entimage/ent"
 
-					Image {
-						id: entimage
-						source: "image://entimage/ent"
-
-						Layout.fillWidth: true
+                        Layout.fillWidth: true
                         Layout.maximumWidth: Qt.platform.os == "android" ? 200 : 400
                         Layout.maximumHeight: Qt.platform.os == "android" ? 110 : 225
 
                         Layout.preferredWidth: Qt.platform.os == "android" ? 200 : 400
                         Layout.preferredHeight: Qt.platform.os == "android" ? 110 : 225
 
-						cache: false
-						asynchronous: true
-						smooth: false
+                        cache: false
+                        asynchronous: true
+                        smooth: false
 
-						Timer {
-							interval: entimagepreview.checked ? 20 : 200;
-                            running: Huestacean.syncing && mainWindow.visibility != Window.Minimized && mainWindow.visible != Window.Hidden;
-							repeat: true;
-							onTriggered: {
+                        Timer {
+                            interval: entimagepreview.checked ? 20 : 200
+                            running: Huestacean.syncing
+                                     && mainWindow.visibility != Window.Minimized
+                                     && mainWindow.visible != Window.Hidden
+                            repeat: true
+                            onTriggered: {
                                 entimage.source = entimage.source == "image://entimage/ent" ? "image://entimage/ent1" : "image://entimage/ent"
-							}
-						}
-					}
-				}
-
-				ColumnLayout {
-					Layout.fillWidth: true
-
-					Label {
-						text: "Entertainment group"
-					}
-
-					RowLayout {
-						Layout.maximumWidth: 300
-
-						Button {
-							id:egroupRedetect
-							text: "Redetect"
-							onClicked: Huestacean.refreshGroups()
-
-							KeyNavigation.right: entertainmentComboBox
-							KeyNavigation.down: entimagepreview
-						}
-
-						ComboBox {
-							id: entertainmentComboBox
-							Layout.fillWidth: true
-							currentIndex: 0
-							model: Huestacean.entertainmentGroupsModel
-							textRole: "asString"
-
-							KeyNavigation.right: entertainmentComboBox
-							KeyNavigation.down: entimagepreview
-
-							property var lights: undefined
-
-							onModelChanged: {
-								updateLights();
-							}
-
-							onCurrentIndexChanged: {
-								updateLights()
-							}
-
-							function updateLights() {
-								if(model) {
-									if(lights) {
-										for (var i in lights) {
-											lights[i].destroy();
-										}
-									}
-
-									lights = [];
-									for(var i = 0; i < model[currentIndex].numLights(); i++) {
-										var light = model[currentIndex].getLight(i);
-										var l = lightComponent.createObject(groupImage);
-										l.name = light.id;
-										l.index = i
-										l.setPos(light.x, light.z)
-										lights.push(l);
-									}
-								}
-							}
-						}
-					}
-
-					Rectangle {
-						color: "black"
-                        height: Qt.platform.os == "android" ? 110 : 220;
-                        width: Qt.platform.os == "android" ? 110 : 220;
-						border.width: 1
-						border.color: "#414141"
-
-						Image {
-							anchors.centerIn: parent
-							id: groupImage
-                            height: Qt.platform.os == "android" ? 100 : 200;
-                            width: Qt.platform.os == "android" ? 100 : 200;
-							source: "qrc:/images/egroup-xy.png"
-						}
-					}
-				}
-			}
-
-			RowLayout {
-				spacing: 20
-
-				CheckBox {
-					id:entimagepreview
-					text: "Fast visualizer"
-					checked: settings.visualizer
-
-					KeyNavigation.down: startSyncButton
-
-				}
-
-        CheckBox {
-            id:hideatstartup
-            text: "Hide at startup"
-            checked: settings.hide
-        }
-
-        CheckBox {
-            id:showtaskicon
-            text: "Show on taskbar"
-            checked: settings.showTaskIcon
-        }
-
-				Label {
-					text: "Frame read:" + Huestacean.frameReadElapsed + "ms"
-				}
-
-				Label {
-					visible: false
-					text: "Net send:" + Huestacean.messageSendElapsed + "ms"
-				}
-			}
-
-			RowLayout {
-				spacing: 20
-
-				Button {
-					id:startSyncButton
-                    objectName: "syncButton"
-					text: Huestacean.syncing ? "Stop sync" : "Start sync"
-					onClicked: Huestacean.syncing ? Huestacean.stopScreenSync() : Huestacean.startScreenSync(entertainmentComboBox.model[entertainmentComboBox.currentIndex])
-
-					KeyNavigation.right: frameslider
-					KeyNavigation.down: minLumaSlider
-				}
-
-				Column {
-					visible: (Qt.platform.os != "android" && Qt.platform.os != "osx")
-
-					Label {
-						text: "Capture interval"
-					}
-
-					Slider {
-						id: frameslider
-
-						Component.onCompleted: value = Huestacean.captureInterval / 100
-						onValueChanged: {
-							Huestacean.captureInterval = value * 100
-						}
-
-						KeyNavigation.right: skipslider
-						KeyNavigation.down: minLumaSlider
-					}
-
-					Label {
-						text: Huestacean.captureInterval + " milliseconds"
-					}
-				}
-
-				Column {
-					visible: !Huestacean.mipMapGenerationEnabled
-
-					Label {
-						text: "Skip pixels"
-					}
-
-					Slider {
-						id: skipslider
-						Component.onCompleted: value = Huestacean.skip / 128
-						onValueChanged: {
-							Huestacean.skip = value * 128
-						}
-
-						KeyNavigation.down: minLumaSlider
-					}
-
-					Label {
-						text: Huestacean.mipMapGenerationEnabled ? "Not needed on this platform" : Huestacean.skip
-					}
-				}
-			}
-
-            RowLayout {
-                Label {
-                    id: serverPortLabel
-                    font.bold: false
-                    text: "Port :"
+                            }
+                        }
+                    }
                 }
 
-                TextField {
-                    id: serverPort
-                    focus: true
-                    width: 150
-                    text: Server.port
+                ColumnLayout {
+                    Layout.fillWidth: true
+
+                    Label {
+                        text: "Entertainment group"
+                    }
+
+                    RowLayout {
+                        Layout.maximumWidth: 300
+
+                        Button {
+                            id: egroupRedetect
+                            text: "Redetect"
+                            onClicked: Huestacean.refreshGroups()
+
+                            KeyNavigation.right: entertainmentComboBox
+                            KeyNavigation.down: entimagepreview
+                        }
+
+                        ComboBox {
+                            id: entertainmentComboBox
+                            Layout.fillWidth: true
+                            currentIndex: 0
+                            model: Huestacean.entertainmentGroupsModel
+                            textRole: "asString"
+
+                            KeyNavigation.right: entertainmentComboBox
+                            KeyNavigation.down: entimagepreview
+
+                            property var lights: undefined
+
+                            onModelChanged: {
+                                updateLights()
+                            }
+
+                            onCurrentIndexChanged: {
+                                updateLights()
+                            }
+
+                            function updateLights() {
+                                if (model) {
+                                    if (lights) {
+                                        for (i in lights) {
+                                            lights[i].destroy()
+                                        }
+                                    }
+
+                                    lights = []
+                                    for (; i < model[currentIndex].numLights(
+                                             ); i++) {
+                                        var light = model[currentIndex].getLight(
+                                                    i)
+                                        var l = lightComponent.createObject(
+                                                    groupImage)
+                                        l.name = light.id
+                                        l.index = i
+                                        l.setPos(light.x, light.z)
+                                        lights.push(l)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        color: "black"
+                        height: Qt.platform.os == "android" ? 110 : 220
+                        width: Qt.platform.os == "android" ? 110 : 220
+                        border.width: 1
+                        border.color: "#414141"
+
+                        Image {
+                            anchors.centerIn: parent
+                            id: groupImage
+                            height: Qt.platform.os == "android" ? 100 : 200
+                            width: Qt.platform.os == "android" ? 100 : 200
+                            source: "qrc:/images/egroup-xy.png"
+                        }
+                    }
+                }
+            }
+
+            RowLayout {
+                spacing: 20
+
+                CheckBox {
+                    id: entimagepreview
+                    text: "Fast visualizer"
+                    checked: settings.visualizer
+
+                    KeyNavigation.down: startSyncButton
+                }
+
+                Label {
+                    text: "Frame read:" + Huestacean.frameReadElapsed + "ms"
+                }
+
+                Label {
+                    visible: false
+                    text: "Net send:" + Huestacean.messageSendElapsed + "ms"
+                }
+            }
+
+            RowLayout {
+                spacing: 20
+
+                CheckBox {
+                    id: hideatstartup
+                    text: "Hide at startup"
+                    checked: settings.hide
+                }
+
+                CheckBox {
+                    id: showtaskicon
+                    text: "Show on taskbar"
+                    checked: settings.showTaskIcon
+                }
+            }
+
+            RowLayout {
+                spacing: 20
+
+                Button {
+                    id: startSyncButton
+                    objectName: "syncButton"
+                    text: Huestacean.syncing ? "Stop sync" : "Start sync"
+                    onClicked: Huestacean.syncing ? Huestacean.stopScreenSync(
+                                                        ) : Huestacean.startScreenSync(
+                                                        entertainmentComboBox.model[entertainmentComboBox.currentIndex])
+
+                    KeyNavigation.right: frameslider
+                    KeyNavigation.down: minLumaSlider
+                }
+
+                CheckBox {
+                    id: enableServer
+                    text: "Enable server (Restart Required)"
+                }
+
+                Column {
+                    visible: (Qt.platform.os != "android"
+                              && Qt.platform.os != "osx")
+
+                    Label {
+                        text: "Capture interval"
+                    }
+
+                    Slider {
+                        id: frameslider
+
+                        Component.onCompleted: value = Huestacean.captureInterval / 100
+                        onValueChanged: {
+                            Huestacean.captureInterval = value * 100
+                        }
+
+                        KeyNavigation.right: skipslider
+                        KeyNavigation.down: minLumaSlider
+                    }
+
+                    Label {
+                        text: Huestacean.captureInterval + " milliseconds"
+                    }
+                }
+
+                Column {
+                    visible: !Huestacean.mipMapGenerationEnabled
+
+                    Label {
+                        text: "Skip pixels"
+                    }
+
+                    Slider {
+                        id: skipslider
+                        Component.onCompleted: value = Huestacean.skip / 128
+                        onValueChanged: {
+                            Huestacean.skip = value * 128
+                        }
+
+                        KeyNavigation.down: minLumaSlider
+                    }
+
+                    Label {
+                        text: Huestacean.mipMapGenerationEnabled ? "Not needed on this platform" : Huestacean.skip
+                    }
                 }
             }
 
@@ -288,10 +290,10 @@ Pane {
                 spacing: 10
 
                 Button {
-                    id:restartButton
+                    id: restartButton
                     objectName: "restartButton"
                     text: "Restart Server"
-                    onClicked:Server.restart
+                    onClicked: Server.restart
                 }
 
                 Button {
@@ -300,233 +302,246 @@ Pane {
                     onClicked: Server.manuallySetPort(serverPort.text)
                 }
 
+                Label {
+    id: serverPortLabel
+    font.bold: false
+    text: "Port :"
+}
+
+TextField {
+    id: serverPort
+    focus: true
+    width: 150
+    text: Server.port
+}
             }
 
-			RowLayout {
-				spacing: 20
+            RowLayout {
+                spacing: 20
 
-				Column {
-					Label {
-						text: "Min brightness"
-					}
+                Column {
+                    Label {
+                        text: "Min brightness"
+                    }
 
-					Slider {
-						id:minLumaSlider
+                    Slider {
+                        id: minLumaSlider
 
-						Component.onCompleted: value = Huestacean.minLuminance
-						onValueChanged: {
-							Huestacean.minLuminance = value
-						}
+                        Component.onCompleted: value = Huestacean.minLuminance
+                        onValueChanged: {
+                            Huestacean.minLuminance = value
+                        }
 
-						KeyNavigation.right: maxLumaSlider
-						KeyNavigation.down: chromaBoostSlider
-					}
+                        KeyNavigation.right: maxLumaSlider
+                        KeyNavigation.down: chromaBoostSlider
+                    }
 
-					Label {
-						text: Huestacean.minLuminance.toFixed(2)
-					}
-				}
+                    Label {
+                        text: Huestacean.minLuminance.toFixed(2)
+                    }
+                }
 
-				Column {
-					Label {
-						text: "Max brightness"
-					}
+                Column {
+                    Label {
+                        text: "Max brightness"
+                    }
 
-					Slider {
-						id:maxLumaSlider
+                    Slider {
+                        id: maxLumaSlider
 
-						Component.onCompleted: value = Huestacean.maxLuminance
-						onValueChanged: {
-							Huestacean.maxLuminance = value
-						}
-					}
+                        Component.onCompleted: value = Huestacean.maxLuminance
+                        onValueChanged: {
+                            Huestacean.maxLuminance = value
+                        }
+                    }
 
-					Label {
-						text: Huestacean.maxLuminance.toFixed(2)
-					}
-				}
-			}
+                    Label {
+                        text: Huestacean.maxLuminance.toFixed(2)
+                    }
+                }
+            }
 
-			RowLayout {
-				spacing: 20
+            RowLayout {
+                spacing: 20
 
-				Column {
-					Label {
-						text: "Saturation boost"
-					}
+                Column {
+                    Label {
+                        text: "Saturation boost"
+                    }
 
-					Slider {
-						id:chromaBoostSlider
+                    Slider {
+                        id: chromaBoostSlider
 
-						Component.onCompleted: value = Huestacean.chromaBoost / 3
-						onValueChanged: {
-							Huestacean.chromaBoost = value * 3
-						}
+                        Component.onCompleted: value = Huestacean.chromaBoost / 3
+                        onValueChanged: {
+                            Huestacean.chromaBoost = value * 3
+                        }
 
-						KeyNavigation.right: lumaBoostSlider
-						KeyNavigation.down: centerSlownessSlider
-					}
+                        KeyNavigation.right: lumaBoostSlider
+                        KeyNavigation.down: centerSlownessSlider
+                    }
 
-					Label {
-						text: Huestacean.chromaBoost.toFixed(2)
-					}
-				}
+                    Label {
+                        text: Huestacean.chromaBoost.toFixed(2)
+                    }
+                }
 
-				Column {
-					Label {
-						text: "Brightness boost"
-					}
+                Column {
+                    Label {
+                        text: "Brightness boost"
+                    }
 
-					Slider {
-						id: lumaBoostSlider
+                    Slider {
+                        id: lumaBoostSlider
 
-						Component.onCompleted: value = Huestacean.lumaBoost / 5
-						onValueChanged: {
-							Huestacean.lumaBoost = value * 5
-						}
+                        Component.onCompleted: value = Huestacean.lumaBoost / 5
+                        onValueChanged: {
+                            Huestacean.lumaBoost = value * 5
+                        }
 
-						KeyNavigation.down: centerSlownessSlider
-					}
+                        KeyNavigation.down: centerSlownessSlider
+                    }
 
-					Label {
-						text: Huestacean.lumaBoost.toFixed(2)
-					}
-				}
-			}
+                    Label {
+                        text: Huestacean.lumaBoost.toFixed(2)
+                    }
+                }
+            }
 
-			RowLayout {
-				spacing: 20
+            RowLayout {
+                spacing: 20
 
-				Column {
-					Label {
-						text: "Center slowness"
-					}
+                Column {
+                    Label {
+                        text: "Center slowness"
+                    }
 
-					Slider {
-						id: centerSlownessSlider
+                    Slider {
+                        id: centerSlownessSlider
 
-						Component.onCompleted: {
-							var slowness = Huestacean.centerSlowness
-							from = 1.0
-							to = 20.0
-							value = slowness
-						}
-						onValueChanged: {
-							Huestacean.centerSlowness = value
-						}
+                        Component.onCompleted: {
+                            var slowness = Huestacean.centerSlowness
+                            from = 1.0
+                            to = 20.0
+                            value = slowness
+                        }
+                        onValueChanged: {
+                            Huestacean.centerSlowness = value
+                        }
 
-						KeyNavigation.right: sideSlownessSlider
-						KeyNavigation.down: resetButton
-					}
+                        KeyNavigation.right: sideSlownessSlider
+                        KeyNavigation.down: resetButton
+                    }
 
-					Label {
-						text: Huestacean.centerSlowness.toFixed(2)
-					}
-				}
+                    Label {
+                        text: Huestacean.centerSlowness.toFixed(2)
+                    }
+                }
 
-				Column {
-					Label {
-						text: "Side slowness"
-					}
+                Column {
+                    Label {
+                        text: "Side slowness"
+                    }
 
-					Slider {
-						id: sideSlownessSlider
+                    Slider {
+                        id: sideSlownessSlider
 
-						Component.onCompleted: {
-							var slowness = Huestacean.sideSlowness
-							from = 1.0
-							to = 20.0
-							value = slowness
-						}
-						onValueChanged: {
-							Huestacean.sideSlowness = value
-						}
+                        Component.onCompleted: {
+                            var slowness = Huestacean.sideSlowness
+                            from = 1.0
+                            to = 20.0
+                            value = slowness
+                        }
+                        onValueChanged: {
+                            Huestacean.sideSlowness = value
+                        }
 
-						KeyNavigation.down: resetButton
-					}
+                        KeyNavigation.down: resetButton
+                    }
 
-					Label {
-						text: Huestacean.sideSlowness.toFixed(2)
-					}
-				}
-			}
+                    Label {
+                        text: Huestacean.sideSlowness.toFixed(2)
+                    }
+                }
+            }
 
-			Column {
-				Button {
-					id:resetButton
-					text: "Reset settings"
-					onClicked: {
-						Huestacean.ResetSettings()
+            Column {
+                Button {
+                    id: resetButton
+                    text: "Reset settings"
+                    onClicked: {
+                        Huestacean.ResetSettings()
 
-						centerSlownessSlider.value = Huestacean.centerSlowness
-						sideSlownessSlider.value = Huestacean.sideSlowness
-						lumaBoostSlider.value = Huestacean.lumaBoost / 5
-						chromaBoostSlider.value = Huestacean.chromaBoost / 3
-						minLumaSlider.value = Huestacean.minLuminance
-						maxLumaSlider.value = Huestacean.maxLuminance
-						skipslider.value = Huestacean.skip / 128
-						frameslider.value = Huestacean.captureInterval / 100
-					}
-				}
-			}
+                        centerSlownessSlider.value = Huestacean.centerSlowness
+                        sideSlownessSlider.value = Huestacean.sideSlowness
+                        lumaBoostSlider.value = Huestacean.lumaBoost / 5
+                        chromaBoostSlider.value = Huestacean.chromaBoost / 3
+                        minLumaSlider.value = Huestacean.minLuminance
+                        maxLumaSlider.value = Huestacean.maxLuminance
+                        skipslider.value = Huestacean.skip / 128
+                        frameslider.value = Huestacean.captureInterval / 100
+                    }
+                }
+            }
+        }
+    }
 
-		}
-	}
-
-	Component {
+    Component {
         id: lightComponent
 
-		Rectangle {
-			id: lightIcon
-			color: "blue";
-			height: 20;
-			width: 20;
-			radius: 5
+        Rectangle {
+            id: lightIcon
+            color: "blue"
+            height: 20
+            width: 20
+            radius: 5
 
-			property var name: "INVALID"
-			property var index: 0
+            property var name: "INVALID"
+            property var index: 0
 
-			function setPos(inX, inY) {
-				x = ((1 + inX) / 2.0) * groupImage.width - width/2
-				y = ((1 - inY) / 2.0) * groupImage.height - height/2
-			}
+            function setPos(inXinY) {
+                x = ((1 + inX) / 2.0) * groupImage.width - width / 2
+                y = ((1 - inY) / 2.0) * groupImage.height - height / 2
+            }
 
-			function updatePosition(inSave) {
-				var bridgeX = 2 * (lightIcon.x + lightIcon.width/2) / groupImage.width - 1
-				var bridgeZ = 1 - 2 * (lightIcon.y + lightIcon.height/2) / groupImage.height
+            function updatePosition(inSave) {
+                var bridgeX = 2 * (lightIcon.x + lightIcon.width / 2) / groupImage.width - 1
+                var bridgeZ = 1 - 2 * (lightIcon.y + lightIcon.height / 2) / groupImage.height
 
-				entertainmentComboBox.model[entertainmentComboBox.currentIndex].updateLightXZ(index, bridgeX, bridgeZ, true);
-			}
+                entertainmentComboBox.model[entertainmentComboBox.currentIndex].updateLightXZ(
+                            index, bridgeX, bridgeZ, true)
+            }
 
-			onXChanged : updatePosition(false);
-			onYChanged : updatePosition(false);
+            onXChanged: updatePosition(false)
+            onYChanged: updatePosition(false)
 
-			Label {
-				anchors.centerIn: parent
-				text: lightIcon.name
-			}
+            Label {
+                anchors.centerIn: parent
+                text: lightIcon.name
+            }
 
-			MouseArea {
-				id: mouseArea
-				anchors.fill: parent
-				drag.target: lightIcon
-				drag.axis: Drag.XAndYAxis
+            MouseArea {
+                id: mouseArea
+                anchors.fill: parent
+                drag.target: lightIcon
+                drag.axis: Drag.XAndYAxis
 
-				drag.minimumX: 0 - width/2
-				drag.maximumX: groupImage.width - width/2
+                drag.minimumX: 0 - width / 2
+                drag.maximumX: groupImage.width - width / 2
 
-				drag.minimumY: 0 - height/2
-				drag.maximumY: groupImage.height - height/2
+                drag.minimumY: 0 - height / 2
+                drag.maximumY: groupImage.height - height / 2
 
-				drag.onActiveChanged: {
-					if(!drag.active) {
-						var bridgeX = 2 * (lightIcon.x + lightIcon.width/2) / groupImage.width - 1
-						var bridgeZ = 1 - 2 * (lightIcon.y + lightIcon.height/2) / groupImage.height
+                drag.onActiveChanged: {
+                    if (!drag.active) {
+                        var bridgeX = 2 * (lightIcon.x + lightIcon.width / 2) / groupImage.width - 1
+                        var bridgeZ = 1 - 2 * (lightIcon.y + lightIcon.height
+                                               / 2) / groupImage.height
 
-						updatePosition(true);
-					}
-				}
-			}
-		}
-	}
+                        updatePosition(true)
+                    }
+                }
+            }
+        }
+    }
 }

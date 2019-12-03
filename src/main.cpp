@@ -67,7 +67,10 @@ int main(int argc, char *argv[])
 
         QApplication app(argc, argv);
 
-        if (QSystemTrayIcon::isSystemTrayAvailable()) {
+        QSettings settings;
+        int showTaskIcon = settings.value("showTaskIcon").toInt();
+
+        if (QSystemTrayIcon::isSystemTrayAvailable() && showTaskIcon) {
                 QApplication::setQuitOnLastWindowClosed(false);
         }
 
@@ -88,7 +91,7 @@ int main(int argc, char *argv[])
 
         rootObject = theEngine.rootObjects().first();
 
-        if (QSystemTrayIcon::isSystemTrayAvailable()) {
+        if (QSystemTrayIcon::isSystemTrayAvailable() && showTaskIcon) {
                 QAction *showAction = new QAction(QObject::tr("&Show"), rootObject);
                 rootObject->connect(showAction, SIGNAL(triggered()), rootObject, SLOT(showNormal()));
                 QAction *hideAction = new QAction(QObject::tr("&Hide"), rootObject);
@@ -107,7 +110,6 @@ int main(int argc, char *argv[])
                 trayIcon->setIcon(QIcon(":images/icon.png"));
                 trayIcon->show();
 
-                QSettings settings;
                 int shouldMinimize = settings.value("hide").toInt();
                 if(shouldMinimize){
                     QTimer::singleShot(0.25 * 1000, rootObject, SLOT(hide()));
