@@ -124,14 +124,14 @@ git submodule update --init --recursive
 
 Run the 'x64 Native Tools Command Prompt for VS 2017'. `cd` to the repository directory.
 
-Assuming you have Qt5.10 installed in `C:\Qt\5.10.0`, run:
+Assuming you have Qt5.15 installed in `C:\Qt\5.15.0`, run:
 
 ```
 mkdir build
 mkdir build\debug
 mkdir build\release
 cd build
-SET CMAKE_PREFIX_PATH=C:\Qt\5.10.0\msvc2017_64\lib\cmake
+SET CMAKE_PREFIX_PATH=C:\Qt\5.15.0\msvc2017_64\lib\cmake
 cmake .. -G "Visual Studio 15 2017 Win64"
 cd debug
 msbuild ../Huestacean.vcxproj /property:Configuration=Debug /property:Platform=x64
@@ -142,12 +142,12 @@ msbuild ../Huestacean.vcxproj /property:Configuration=Release /property:Platform
 Then use [windeployqt](http://doc.qt.io/qt-5/windows-deployment.html) to copy in the necessary deployment files. e.g.
 
 ```
-C:\Qt\Qt5.10.0\5.10.0\msvc2017_64\bin\windeployqt.exe huestacean.exe -qmldir=../../qml
+C:\Qt\Qt5.15.0\5.15.0\msvc2017_64\bin\windeployqt.exe huestacean.exe -qmldir=../../qml
 ```
 
 #### CMake, Visual Studio
 
-Set the `CMAKE_PREFIX_PATH` environment variable to, e.g., `C:\Qt\5.10.0\msvc2017_64\lib\cmake`
+Set the `CMAKE_PREFIX_PATH` environment variable to, e.g., `C:\Qt\5.15.0\msvc2017_64\lib\cmake`
 
 Open VS 2017. File -> Open -> CMake -> huestacean\CMakeLists.txt
 
@@ -160,7 +160,7 @@ or set Huestacean as the startup target and start debugging.
 **NB:** You'll need to copy the necessary Qt DLLs over or run [windeployqt](http://doc.qt.io/qt-5/windows-deployment.html) before the project will run. e.g.
 
 ```
-C:\Qt\Qt5.10.0\5.10.0\msvc2017_64\bin\windeployqt.exe huestacean.exe -qmldir=../../qml
+C:\Qt\Qt5.15.0\5.15.0\msvc2017_64\bin\windeployqt.exe huestacean.exe -qmldir=../../qml
 ```
 
 ### Mac
@@ -168,7 +168,7 @@ C:\Qt\Qt5.10.0\5.10.0\msvc2017_64\bin\windeployqt.exe huestacean.exe -qmldir=../
 Set the `CMAKE_PREFIX_PATH` environment variable to point to your Qt install directory. For Mac, this could look like:
 
 ```
-export CMAKE_PREFIX_PATH=~/Qt/5.10.0/clang_64/lib/cmake
+export CMAKE_PREFIX_PATH=~/Qt/5.15.0/clang_64/lib/cmake
 ```
 
 `cd` into the repository directory, then simply build with `cmake` and `make`
@@ -185,7 +185,7 @@ make huestacean
 Use `macdeployqt` to copy in the necessary Frameworks and other files.
 
 ```
-~/Qt/5.10.0/clang_64/bin/macdeployqt huestacean.app -qmldir=../qml
+~/Qt/5.15.0/clang_64/bin/macdeployqt huestacean.app -qmldir=../qml
 ```
 
 ### Linux
@@ -233,4 +233,4 @@ This software makes use of open source software under various licenses, which ma
 -   screen_capture_lite: license-screen_capture_lite.txt
 -   mbedtls and grafika: apache-2.0.txt
 
-This software uses Qt 5, which is licensed under the GNU Lesser General Public License v3.0. The text of the license can be found in [lgpl-3.txt](third_party_licenses/lgpl-3.txt). The corresponding source code for Qt can be found [on their website](https://www.qt.io/download), or at https://s3.us-east-2.amazonaws.com/bbrenot-thirdparty-sourcecode/qt-everywhere-src-5.10.0.tar.xz ; the end user can provide their own Qt5 and modifications by replacing the distributed Qt shared library files (Qt\* .dll, .so, .dylib, etc.)
+This software uses Qt 5, which is licensed under the GNU Lesser General Public License v3.0. The text of the license can be found in [lgpl-3.txt](third_party_licenses/lgpl-3.txt). The corresponding source code for Qt can be found [on their website](https://www.qt.io/download), or at https://s3.us-east-2.amazonaws.com/bbrenot-thirdparty-sourcecode/qt-everywhere-src-5.15.0.tar.xz ; the end user can provide their own Qt5 and modifications by replacing the distributed Qt shared library files (Qt\* .dll, .so, .dylib, etc.)
