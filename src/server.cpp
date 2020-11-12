@@ -53,9 +53,7 @@
 #include <QtCore>
 #include <QSettings>
 
-
 #include <QMessageBox>
-
 
 #include "server.h"
 #include "huestacean.h"

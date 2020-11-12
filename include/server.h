@@ -62,41 +62,44 @@ class QNetworkSession;
 QT_END_NAMESPACE
 
 //! [0]
-class Server : public QObject
+class Server: public QObject
 {
-    Q_OBJECT
-    Q_PROPERTY(int port READ getPort NOTIFY onInit)
+        Q_OBJECT
+        Q_PROPERTY(int port READ getPort NOTIFY onInit)
 
 public:
-    explicit Server(QObject *parent = nullptr);
+        explicit Server(QObject *parent = nullptr);
 
-    Q_INVOKABLE void restart();
+        Q_INVOKABLE void restartServer() {
+                restart();
+        };
 
-    Q_INVOKABLE void manuallySetPort(int portNum) {
-        setPort(portNum);
-    }
+        Q_INVOKABLE void manuallySetPort(int portNum) {
+                setPort(portNum);
+        }
 
-    int getPort() const {
-        return port;
-    }
+        int getPort() const {
+                return port;
+        }
 
-    int port;
+        int port;
 
 signals:
-    void onInit();
+        void onInit();
 
 private slots:
-    void sessionOpened();
-    void connected();
-    void readyRead();
-    void error();
-    void setPort(int portNum);
+        void sessionOpened();
+        void connected();
+        void readyRead();
+        void error();
+        void setPort(int portNum);
+        void restart();
 
 
 private:
-    QTcpServer *tcpServer = nullptr;
-    QNetworkSession *networkSession = nullptr;
-    int savedPortNum;
+        QTcpServer *tcpServer = nullptr;
+        QNetworkSession *networkSession = nullptr;
+        int savedPortNum;
 };
 
 #endif

@@ -293,7 +293,7 @@ Pane {
                     id: restartButton
                     objectName: "restartButton"
                     text: "Restart Server"
-                    onClicked: Server.restart
+                    onClicked: Server.restartServer()
                 }
 
                 Button {

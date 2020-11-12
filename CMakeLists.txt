@@ -27,6 +27,7 @@ set(SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
    ${CMAKE_CURRENT_SOURCE_DIR}/src/server.cpp
 )
+
 set(HEADERS
    ${HEADERS}
    ${CMAKE_CURRENT_SOURCE_DIR}/include/bridgediscovery.h
@@ -40,10 +41,10 @@ set(HEADERS
 
 QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/include ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/mbedtls/include ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_subdirectory(screen_capture_lite)
-add_subdirectory(mbedtls)
+add_subdirectory(thirdparty/screen_capture_lite EXCLUDE_FROM_ALL)
+add_subdirectory(thirdparty/mbedtls EXCLUDE_FROM_ALL)
 
 set(LIBRARIES
    ${LIBRARIES}

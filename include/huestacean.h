@@ -17,7 +17,7 @@
 
 
 #if !ANDROID
-#include "screen_capture_lite/include/ScreenCapture.h"
+#include "thirdparty/screen_capture_lite/include/ScreenCapture.h"
 #else
 #include <jni.h>
 #endif
