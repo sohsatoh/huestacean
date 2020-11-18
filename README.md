@@ -22,7 +22,7 @@ I will not add the web gui as this fork does not intend to release.
 
 ## Download
 
-Downloadable binaries for Windows and macOS are available on the **[Releases](https://github.com/BradyBrenot/huestacean/releases)** page; see [Installing](#installing) for more information. It ought to also be possible to build the source for Linux but this has not yet been tested, see **_Building_** below.
+Downloadable binaries for macOS are available on the **[Releases](https://github.com/sohsatoh/huestacean/releases)** page; see [Installing](#installing) for more information. It ought to also be possible to build the source for Linux but this has not yet been tested, see **_Building_** below.
 
 ## Safety notice
 
